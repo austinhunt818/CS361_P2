@@ -20,4 +20,8 @@ public class NFAState extends State{
     public String toString() {
         return super.toString();
     }
+
+    public long toStates(char c) {
+        return 0;
+    }
 }
