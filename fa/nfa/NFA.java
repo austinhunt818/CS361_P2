@@ -1,7 +1,5 @@
 package fa.nfa;
 
-import fa.State;
-
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -65,12 +63,12 @@ public class NFA implements NFAInterface {
 
     @Override
     public boolean isFinal(String name) {
-        return false;
+        return finalStates.contains(getStateByName(name, finalStates));
     }
 
     @Override
     public boolean isStart(String name) {
-        return false;
+        return startState.getName().equals(name);
     }
 
     @Override
