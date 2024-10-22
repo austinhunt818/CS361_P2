@@ -2,6 +2,7 @@ package fa.nfa;
 
 import fa.State;
 
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -12,7 +13,6 @@ public class NFA implements NFAInterface {
     Set<Character> symbols = new LinkedHashSet<>();
 
     NFAState startState;
-    NFAState finalState;
 
     @Override
     public boolean addState(String name) {
@@ -29,7 +29,7 @@ public class NFA implements NFAInterface {
         if (state == null) {
             return false; // State does not exist
         }
-        finalState = state;
+        finalStates.add(state);
         return true;
     }
 
@@ -75,7 +75,7 @@ public class NFA implements NFAInterface {
 
     @Override
     public Set<NFAState> getToState(NFAState from, char onSymb) {
-        return null;
+        return getStateByName(from.getName(), states).transitions.get(onSymb);
     }
 
     @Override
@@ -90,7 +90,19 @@ public class NFA implements NFAInterface {
 
     @Override
     public boolean addTransition(String fromState, Set<String> toStates, char onSymb) {
-        return false;
+        NFAState fromStateObj = getState(fromState);
+        Set<NFAState> toStatesObj = new HashSet<>();
+
+        if(fromStateObj == null || (onSymb != 'e' && !symbols.contains(onSymb))){
+            return false;
+        }
+        for(String stateName : toStates){
+            if(getState(stateName) == null)  return false;
+            toStatesObj.add(new NFAState(stateName));
+        }
+
+        fromStateObj.transitions.put(onSymb, toStatesObj);
+        return true;
     }
 
     @Override
