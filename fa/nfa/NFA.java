@@ -8,6 +8,7 @@ import java.util.Set;
 public class NFA implements NFAInterface {
 
     Set<NFAState> states = new LinkedHashSet<>();
+    Set<NFAState> finalStates = new LinkedHashSet<>();
     Set<Character> symbols = new LinkedHashSet<>();
 
     NFAState startState;
@@ -54,7 +55,7 @@ public class NFA implements NFAInterface {
 
     @Override
     public Set<Character> getSigma() {
-        return null;
+        return symbols;
     }
 
     @Override
@@ -89,7 +90,7 @@ public class NFA implements NFAInterface {
 
     @Override
     public boolean addTransition(String fromState, Set<String> toStates, char onSymb) {
-
+        return false;
     }
 
     @Override
