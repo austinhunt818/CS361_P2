@@ -42,7 +42,7 @@ public class NFAState extends State{
         return super.toString();
     }
 
-    public long toStates(char c) {
-        return 0;
-    }
+    public Set<NFAState> toStates(char c) {
+        return transitions.getOrDefault(c, Collections.emptySet());
+    }    
 }

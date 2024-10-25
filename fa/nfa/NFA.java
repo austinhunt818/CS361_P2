@@ -3,6 +3,7 @@ package fa.nfa;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.Stack;
 
 public class NFA implements NFAInterface {
 
@@ -48,6 +49,24 @@ public class NFA implements NFAInterface {
 
     @Override
     public boolean accepts(String s) {
+        Set<NFAState> currentStates = eClosure(startState);
+        for (char c : s.toCharArray()) {
+            Set<NFAState> nextStates = new HashSet<>();
+            for (NFAState state : currentStates) {
+                Set<NFAState> transitions = getToState(state, c);
+                if (transitions != null) {
+                    for (NFAState transState : transitions) {
+                        nextStates.addAll(eClosure(transState));
+                    }
+                }
+            }
+            currentStates = nextStates;
+        }
+        for (NFAState state : currentStates) {
+            if (finalStates.contains(state)) {
+                return true;
+            }
+        }
         return false;
     }
 
@@ -78,12 +97,42 @@ public class NFA implements NFAInterface {
 
     @Override
     public Set<NFAState> eClosure(NFAState s) {
-        return null;
+        Set<NFAState> closure = new HashSet<>();
+        Stack<NFAState> stack = new Stack<>();
+        stack.push(s);
+        while (!stack.isEmpty()) {
+            NFAState currentState = stack.pop();
+            closure.add(currentState);
+            Set<NFAState> epsilonTransitions = currentState.transitions.get('e');
+            if (epsilonTransitions != null) {
+                for (NFAState transState : epsilonTransitions) {
+                    if (!closure.contains(transState)) {
+                        stack.push(transState);
+                    }
+                }
+            }
+        }
+        return closure;
     }
 
     @Override
     public int maxCopies(String s) {
-        return 0;
+        int max = 1;
+        Set<NFAState> currentStates = eClosure(startState);
+        for (char c : s.toCharArray()) {
+            Set<NFAState> nextStates = new HashSet<>();
+            for (NFAState state : currentStates) {
+                Set<NFAState> transitions = getToState(state, c);
+                if (transitions != null) {
+                    for (NFAState transState : transitions) {
+                        nextStates.addAll(eClosure(transState));
+                    }
+                }
+            }
+            currentStates = nextStates;
+            max = Math.max(max, currentStates.size());
+        }
+        return max;
     }
 
     @Override
