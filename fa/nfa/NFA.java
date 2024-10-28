@@ -51,20 +51,11 @@ public class NFA implements NFAInterface {
     public boolean accepts(String s) {
         Set<NFAState> currentStates = eClosure(startState);
         for (char c : s.toCharArray()) {
-            Set<NFAState> nextStates = new HashSet<>();
-            for (NFAState state : currentStates) {
-                Set<NFAState> transitions = getToState(state, c);
-                if (transitions != null) {
-                    for (NFAState transState : transitions) {
-                        nextStates.addAll(eClosure(transState));
-                    }
-                }
-            }
-            currentStates = nextStates;
+            currentStates = traceNFA(currentStates, c);
         }
         for (NFAState state : currentStates) {
-            if (finalStates.contains(state)) {
-                return true;
+            for(NFAState finalState : finalStates){
+                if(state.equals(finalState)) return true;
             }
         }
         return false;
@@ -92,7 +83,14 @@ public class NFA implements NFAInterface {
 
     @Override
     public Set<NFAState> getToState(NFAState from, char onSymb) {
-        return getStateByName(from.getName(), states).transitions.get(onSymb);
+        Set<NFAState> transitions = getState(from.getName()).transitions.get(onSymb);
+        if(transitions == null) return null;
+        Set<NFAState> trueTransitions = new LinkedHashSet<>();
+        for(NFAState transState : transitions){
+            trueTransitions.add(getState(transState.getName()));
+        }
+
+        return trueTransitions;
     }
 
     @Override
@@ -107,7 +105,7 @@ public class NFA implements NFAInterface {
             if (epsilonTransitions != null) {
                 for (NFAState transState : epsilonTransitions) {
                     if (!closure.contains(transState)) {
-                        stack.push(transState);
+                        stack.push(getStateByName(transState.getName(), states));
                     }
                 }
             }
@@ -120,19 +118,31 @@ public class NFA implements NFAInterface {
         int max = 1;
         Set<NFAState> currentStates = eClosure(startState);
         for (char c : s.toCharArray()) {
-            Set<NFAState> nextStates = new HashSet<>();
-            for (NFAState state : currentStates) {
-                Set<NFAState> transitions = getToState(state, c);
-                if (transitions != null) {
-                    for (NFAState transState : transitions) {
-                        nextStates.addAll(eClosure(transState));
-                    }
+            if(!symbols.contains(c)) {
+                Set<NFAState> newStates = new LinkedHashSet<>();
+                for(NFAState state : currentStates){
+                    newStates.addAll(eClosure(state));
                 }
+                currentStates = newStates;
             }
-            currentStates = nextStates;
+            else currentStates = traceNFA(currentStates, c);
             max = Math.max(max, currentStates.size());
         }
         return max;
+    }
+
+    private Set<NFAState> traceNFA(Set<NFAState> currentStates, char c) {
+        Set<NFAState> nextStates = new HashSet<>();
+        for (NFAState state : currentStates) {
+            Set<NFAState> transitions = getToState(state, c);
+            if (transitions != null) {
+                for (NFAState transState : transitions) {
+                    nextStates.addAll(eClosure(transState));
+                }
+            }
+        }
+        currentStates = nextStates;
+        return currentStates;
     }
 
     @Override
@@ -146,9 +156,9 @@ public class NFA implements NFAInterface {
         for(String stateName : toStates){
             if(getState(stateName) == null)  return false;
             toStatesObj.add(new NFAState(stateName));
+            fromStateObj.addTransition(new NFAState(stateName), onSymb);
         }
 
-        fromStateObj.transitions.put(onSymb, toStatesObj);
         return true;
     }
 

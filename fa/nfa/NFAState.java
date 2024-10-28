@@ -43,6 +43,10 @@ public class NFAState extends State{
     }
 
     public Set<NFAState> toStates(char c) {
-        return transitions.getOrDefault(c, Collections.emptySet());
-    }    
+        return transitions.getOrDefault(c, new LinkedHashSet<>());
+    }
+
+    public boolean equals(NFAState obj) {
+        return obj.getName().equals(this.getName());
+    }
 }
