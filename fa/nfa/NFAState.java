@@ -4,13 +4,15 @@ import fa.State;
 
 import java.util.*;
 
+/**
+ * @author Austin Hunt
+ * @author Carson Magee
+ *
+ * An NFAState that manages its own transitions
+ */
 public class NFAState extends State{
 
     Map<Character, Set<NFAState>> transitions = new HashMap<>();
-
-    public NFAState() {
-        super();
-    }
 
     public NFAState(String name) {
         super(name);
@@ -42,11 +44,4 @@ public class NFAState extends State{
         return super.toString();
     }
 
-    public Set<NFAState> toStates(char c) {
-        return transitions.getOrDefault(c, new LinkedHashSet<>());
-    }
-
-    public boolean equals(NFAState obj) {
-        return obj.getName().equals(this.getName());
-    }
 }

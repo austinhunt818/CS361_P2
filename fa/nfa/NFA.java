@@ -5,6 +5,14 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.Stack;
 
+/**
+ * @author Austin Hunt
+ * @author Carson Magee
+ *
+ * An NFA that is able to add states and transitions, and can check the
+ * e-closure of a state, max amount of copies, and if a string is accepted
+ * by the machine.
+ */
 public class NFA implements NFAInterface {
 
     Set<NFAState> states = new LinkedHashSet<>();
@@ -131,6 +139,12 @@ public class NFA implements NFAInterface {
         return max;
     }
 
+    /**
+     * Does one step of a trace through the machine
+     * @param currentStates the current states at this point in the trace
+     * @param c the symbol to take the next transition on
+     * @return the next set of states after taking the transitions from each current state on c
+     */
     private Set<NFAState> traceNFA(Set<NFAState> currentStates, char c) {
         Set<NFAState> nextStates = new HashSet<>();
         for (NFAState state : currentStates) {
