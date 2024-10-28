@@ -23,7 +23,7 @@ public class NFA implements NFAInterface {
 
     @Override
     public boolean addState(String name) {
-        if(states.contains(getStateByName(name, states))){
+        if(states.contains(getState(name))){
             return false;
         }
         states.add(new NFAState(name));
@@ -32,7 +32,7 @@ public class NFA implements NFAInterface {
 
     @Override
     public boolean setFinal(String name) {
-        NFAState state = getStateByName(name, states);
+        NFAState state = getState(name);
         if (state == null) {
             return false; // State does not exist
         }
@@ -42,7 +42,7 @@ public class NFA implements NFAInterface {
 
     @Override
     public boolean setStart(String name) {
-        NFAState state = getStateByName(name, states);
+        NFAState state = getState(name);
         if (state == null) {
             return false; // State does not exist
         }
@@ -91,14 +91,7 @@ public class NFA implements NFAInterface {
 
     @Override
     public Set<NFAState> getToState(NFAState from, char onSymb) {
-        Set<NFAState> transitions = getState(from.getName()).transitions.get(onSymb);
-        if(transitions == null) return null;
-        Set<NFAState> trueTransitions = new LinkedHashSet<>();
-        for(NFAState transState : transitions){
-            trueTransitions.add(getState(transState.getName()));
-        }
-
-        return trueTransitions;
+        return from.transitions.get(onSymb);
     }
 
     @Override
@@ -170,7 +163,7 @@ public class NFA implements NFAInterface {
         for(String stateName : toStates){
             if(getState(stateName) == null)  return false;
             toStatesObj.add(new NFAState(stateName));
-            fromStateObj.addTransition(new NFAState(stateName), onSymb);
+            fromStateObj.addTransition(getState(stateName), onSymb);
         }
 
         return true;
