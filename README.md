@@ -15,7 +15,8 @@ This project was very interesting and I feel that I have a deeper understanding 
 were in the NFA class's accept, eclosure, and maxCopies methods. For this project, Carson did a first pass implementation of these, while I set up most of the other stuff and
 debugged them. While debugging, I ran into an issue in multiple tests where any kind of trace would seemingly stop early. After some debugging, I found that some of the state
 objects that were being returned and passed did not have transitions. Eventually, I realized that the issue was that the states that were given as the transition states of a
-given origin state were not actually instances of the other states of the machine, but just represented them by name. This was due to how the tester creates the NFA
+given origin state were not actually instances of the other states of the machine, but just represented them by name. This was due to how I was adding a transition. I fixed
+this by adding the instance of the machine's states rather than a new state object to the transitions set. Overall, this was a challenging and fun project.
 
 ### Carson
 
