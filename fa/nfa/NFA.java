@@ -3,7 +3,16 @@ package fa.nfa;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.Stack;
 
+/**
+ * @author Austin Hunt
+ * @author Carson Magee
+ *
+ * An NFA that is able to add states and transitions, and can check the
+ * e-closure of a state, max amount of copies, and if a string is accepted
+ * by the machine.
+ */
 public class NFA implements NFAInterface {
 
     Set<NFAState> states = new LinkedHashSet<>();
@@ -14,7 +23,7 @@ public class NFA implements NFAInterface {
 
     @Override
     public boolean addState(String name) {
-        if(states.contains(getStateByName(name, states))){
+        if(states.contains(getState(name))){
             return false;
         }
         states.add(new NFAState(name));
@@ -23,7 +32,7 @@ public class NFA implements NFAInterface {
 
     @Override
     public boolean setFinal(String name) {
-        NFAState state = getStateByName(name, states);
+        NFAState state = getState(name);
         if (state == null) {
             return false; // State does not exist
         }
@@ -33,7 +42,7 @@ public class NFA implements NFAInterface {
 
     @Override
     public boolean setStart(String name) {
-        NFAState state = getStateByName(name, states);
+        NFAState state = getState(name);
         if (state == null) {
             return false; // State does not exist
         }
@@ -48,6 +57,15 @@ public class NFA implements NFAInterface {
 
     @Override
     public boolean accepts(String s) {
+        Set<NFAState> currentStates = eClosure(startState);
+        for (char c : s.toCharArray()) {
+            currentStates = traceNFA(currentStates, c);
+        }
+        for (NFAState state : currentStates) {
+            for(NFAState finalState : finalStates){
+                if(state.equals(finalState)) return true;
+            }
+        }
         return false;
     }
 
@@ -73,17 +91,65 @@ public class NFA implements NFAInterface {
 
     @Override
     public Set<NFAState> getToState(NFAState from, char onSymb) {
-        return getStateByName(from.getName(), states).transitions.get(onSymb);
+        return from.transitions.get(onSymb);
     }
 
     @Override
     public Set<NFAState> eClosure(NFAState s) {
-        return null;
+        Set<NFAState> closure = new HashSet<>();
+        Stack<NFAState> stack = new Stack<>();
+        stack.push(s);
+        while (!stack.isEmpty()) {
+            NFAState currentState = stack.pop();
+            closure.add(currentState);
+            Set<NFAState> epsilonTransitions = currentState.transitions.get('e');
+            if (epsilonTransitions != null) {
+                for (NFAState transState : epsilonTransitions) {
+                    if (!closure.contains(transState)) {
+                        stack.push(getStateByName(transState.getName(), states));
+                    }
+                }
+            }
+        }
+        return closure;
     }
 
     @Override
     public int maxCopies(String s) {
-        return 0;
+        int max = 1;
+        Set<NFAState> currentStates = eClosure(startState);
+        for (char c : s.toCharArray()) {
+            if(!symbols.contains(c)) {
+                Set<NFAState> newStates = new LinkedHashSet<>();
+                for(NFAState state : currentStates){
+                    newStates.addAll(eClosure(state));
+                }
+                currentStates = newStates;
+            }
+            else currentStates = traceNFA(currentStates, c);
+            max = Math.max(max, currentStates.size());
+        }
+        return max;
+    }
+
+    /**
+     * Does one step of a trace through the machine
+     * @param currentStates the current states at this point in the trace
+     * @param c the symbol to take the next transition on
+     * @return the next set of states after taking the transitions from each current state on c
+     */
+    private Set<NFAState> traceNFA(Set<NFAState> currentStates, char c) {
+        Set<NFAState> nextStates = new HashSet<>();
+        for (NFAState state : currentStates) {
+            Set<NFAState> transitions = getToState(state, c);
+            if (transitions != null) {
+                for (NFAState transState : transitions) {
+                    nextStates.addAll(eClosure(transState));
+                }
+            }
+        }
+        currentStates = nextStates;
+        return currentStates;
     }
 
     @Override
@@ -97,9 +163,9 @@ public class NFA implements NFAInterface {
         for(String stateName : toStates){
             if(getState(stateName) == null)  return false;
             toStatesObj.add(new NFAState(stateName));
+            fromStateObj.addTransition(getState(stateName), onSymb);
         }
 
-        fromStateObj.transitions.put(onSymb, toStatesObj);
         return true;
     }
 
