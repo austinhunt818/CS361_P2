@@ -20,6 +20,7 @@ this by adding the instance of the machine's states rather than a new state obje
 
 ### Carson
 
+This project offered a deeper understanding of NFAs, building on what we learned in the DFA project. My main focus was implementing the accepts, eClosure, and maxCopies methods in the NFA.java class. I also expanded the toStates function within NFAState.java, which allowed for more flexible transitions between states. The main problem I faced was where states transitioned into a loop or where certain states appeared multiple times within the closure set. This led to infinite loops. Another issue I had was updating accepts to work seamlessly with eClosure by making sure each symbol correctly mapped to all potential reachable states which I had to manage intermediate states and make sure no paths were discarded to early. It was rewarding to see our project come together and correctly simulate the behavior of an NFA.
 
 ## Compiling and Using
 
